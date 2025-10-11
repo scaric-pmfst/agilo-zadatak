@@ -1,4 +1,5 @@
 import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
       <div className="p-6 h-[2000px]">
         <p>Test Scrollable navigation bar</p>
       </div>
+      <Footer />
     </main>
   );
 }
