@@ -1,9 +1,10 @@
 "use client";
+
 import Link from "next/link";
 import { useState } from "react";
 import { mona } from "@/lib/fonts";
 
-const Navbar: React.FC = () => {
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -65,7 +66,7 @@ const Navbar: React.FC = () => {
 
       {/* Menu (Mobile) */}
       <div className="md:hidden flex items-center gap-4">
-        {/* Cart (Always Visible/Not included in hamburger)*/}
+        {/* Cart (Always visible/Not included in hamburger) */}
         <Link href="#" className="text-[#050505]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -83,7 +84,7 @@ const Navbar: React.FC = () => {
           </svg>
         </Link>
 
-        {/* Hamburger menu*/}
+        {/* Hamburger menu */}
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="text-[#050505] focus:outline-none"
@@ -138,6 +139,4 @@ const Navbar: React.FC = () => {
       )}
     </nav>
   );
-};
-
-export default Navbar;
+}
