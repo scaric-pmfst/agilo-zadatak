@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
+import { useCart } from "@/components/cart-component";
 
 interface ProductDetailProps {
   product: any;
@@ -20,7 +21,10 @@ export default function ProductDetail({
   product,
   regionId,
 }: ProductDetailProps) {
-  // Debug: Log the product data
+  const { addItem } = useCart();
+  const [isAdding, setIsAdding] = useState(false);
+
+  // Debug: Product data logging
   useEffect(() => {
     console.log("Full product data:", product);
     console.log("Variants:", product.variants);
@@ -85,7 +89,7 @@ export default function ProductDetail({
     return found;
   }, [product.variants, selectedMaterial, selectedColor]);
 
-  // Get price for the region
+  // Get the price for the region
   const price = useMemo(() => {
     console.log("Calculating price for variant:", selectedVariant);
 
@@ -96,12 +100,12 @@ export default function ProductDetail({
 
     console.log("Available prices:", selectedVariant.prices);
 
-    // First try to find price with region rule
+    // Try to find price with region rule
     const regionPrice = selectedVariant.prices.find(
       (p: any) => p.rules?.region_id === regionId
     );
 
-    // If not found, get default price (no rules)
+    // If not found, get the default price (no rules)
     const defaultPrice = selectedVariant.prices.find(
       (p: any) => !p.rules || Object.keys(p.rules).length === 0
     );
@@ -142,12 +146,19 @@ export default function ProductDetail({
   const images = product.images?.map((img: any) => img.url) || [];
 
   const handleAddToCart = async () => {
+    console.log("[ProductDetail] Add to cart clicked");
+
     if (!selectedVariant) {
+      console.warn("[ProductDetail] No variant selected");
       alert("Please select all options");
       return;
     }
 
     if (inventoryQuantity < quantity) {
+      console.warn("[ProductDetail] Insufficient inventory:", {
+        inventoryQuantity,
+        quantity,
+      });
       alert(`Only ${inventoryQuantity} items available in stock`);
       return;
     }
@@ -158,6 +169,18 @@ export default function ProductDetail({
       price,
       sku: selectedVariant.sku,
     });
+
+    setIsAdding(true);
+    try {
+      await addItem(selectedVariant.id, quantity);
+      console.log("[ProductDetail] Item added successfully");
+      setQuantity(1); // Reset quantity
+    } catch (error) {
+      // No need to show another alert since CartContext is handling errors
+      console.error("[ProductDetail] Failed to add item:", error);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -172,7 +195,7 @@ export default function ProductDetail({
               alt={product.title}
               fill
               className="object-contain"
-              sizes="100vw"
+              sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
           ) : (
@@ -254,7 +277,13 @@ export default function ProductDetail({
             <p className="text-gray-800 font-medium mb-2">Materials</p>
             <select
               value={selectedMaterial}
-              onChange={(e) => setSelectedMaterial(e.target.value)}
+              onChange={(e) => {
+                console.log(
+                  "[ProductDetail] Material changed to:",
+                  e.target.value
+                );
+                setSelectedMaterial(e.target.value);
+              }}
               className="border border-gray-300 rounded-md px-3 py-2 w-48 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             >
               {materials.map((material: string) => (
@@ -276,7 +305,10 @@ export default function ProductDetail({
                 return (
                   <button
                     key={color}
-                    onClick={() => setSelectedColor(color)}
+                    onClick={() => {
+                      console.log("[ProductDetail] Color changed to:", color);
+                      setSelectedColor(color);
+                    }}
                     className={`w-10 h-10 rounded-md border-2 transition-all ${
                       selectedColor === color
                         ? "border-black ring-2 ring-black ring-offset-2"
@@ -296,13 +328,17 @@ export default function ProductDetail({
         )}
 
         {/* Debug info */}
-        <div className="mb-4 p-4 bg-gray-100 rounded text-xs">
+        <div className="mb-4 p-4 bg-gray-100 rounded text-xs space-y-1">
+          <p className="font-bold">Product Debug Info:</p>
           <p>Selected Material: {selectedMaterial}</p>
           <p>Selected Color: {selectedColor}</p>
           <p>Variant Found: {selectedVariant ? "Yes" : "No"}</p>
+          <p>Variant ID: {selectedVariant?.id || "N/A"}</p>
           <p>Variant SKU: {selectedVariant?.sku || "N/A"}</p>
           <p>Price: €{price}</p>
           <p>Stock: {inventoryQuantity}</p>
+          <p>Quantity to Add: {quantity}</p>
+          <p>Adding State: {isAdding ? "Yes" : "No"}</p>
         </div>
 
         {/* Stock and Variant SKU */}
@@ -329,13 +365,13 @@ export default function ProductDetail({
           </div>
         )}
 
-        {/* Quantity and `Add to cart`/`Out of stock`*/}
+        {/* Quantity and `Add to cart`/˙Out of stock` */}
         <div className="flex items-center gap-4">
           <div className="flex items-center border border-gray-300 rounded-md">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
               className="px-3 py-2 text-lg hover:bg-gray-50"
-              disabled={!selectedVariant || inventoryQuantity === 0}
+              disabled={!selectedVariant || inventoryQuantity === 0 || isAdding}
             >
               -
             </button>
@@ -347,17 +383,21 @@ export default function ProductDetail({
                 setQuantity(Math.min(inventoryQuantity, quantity + 1))
               }
               className="px-3 py-2 text-lg hover:bg-gray-50"
-              disabled={!selectedVariant || inventoryQuantity === 0}
+              disabled={!selectedVariant || inventoryQuantity === 0 || isAdding}
             >
               +
             </button>
           </div>
           <button
             onClick={handleAddToCart}
-            disabled={!selectedVariant || inventoryQuantity === 0}
+            disabled={!selectedVariant || inventoryQuantity === 0 || isAdding}
             className="bg-black text-white px-8 py-3 rounded-md text-sm hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {inventoryQuantity === 0 ? "Out of stock" : "Add to cart"}
+            {isAdding
+              ? "Adding..."
+              : inventoryQuantity === 0
+              ? "Out of stock"
+              : "Add to cart"}
           </button>
         </div>
 

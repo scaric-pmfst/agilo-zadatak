@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { mona } from "@/lib/fonts";
+import { useCart } from "@/components/cart-component";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { itemsCount, openCart } = useCart();
 
   return (
     <nav
@@ -28,8 +30,9 @@ export default function Navbar() {
         <Link href="#" className="flex items-center gap-1">
           HR <span className="text-xs">▼</span>
         </Link>
+
+        {/* Search button */}
         <Link href="#">
-          {/* Search */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"
@@ -45,8 +48,15 @@ export default function Navbar() {
             />
           </svg>
         </Link>
-        <Link href="#">
-          {/* Cart */}
+
+        {/* Cart button */}
+        <button
+          onClick={() => {
+            console.log("[Navbar] Cart button clicked, items:", itemsCount);
+            openCart();
+          }}
+          className="relative"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"
@@ -61,13 +71,27 @@ export default function Navbar() {
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m5-9v9m4-9v9m5-9l2 9"
             />
           </svg>
-        </Link>
+          {itemsCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {itemsCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Menu (Mobile) */}
       <div className="md:hidden flex items-center gap-4">
-        {/* Cart (Always visible/Not included in hamburger) */}
-        <Link href="#" className="text-[#050505]">
+        {/* Cart */}
+        <button
+          onClick={() => {
+            console.log(
+              "[Navbar] Mobile cart button clicked, items:",
+              itemsCount
+            );
+            openCart();
+          }}
+          className="relative text-[#050505]"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"
@@ -82,7 +106,12 @@ export default function Navbar() {
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m5-9v9m4-9v9m5-9l2 9"
             />
           </svg>
-        </Link>
+          {itemsCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {itemsCount}
+            </span>
+          )}
+        </button>
 
         {/* Hamburger menu */}
         <button
@@ -126,9 +155,7 @@ export default function Navbar() {
       {/* Expanded Hamburger Menu */}
       {isOpen && (
         <div className="absolute top-full left-0 w-full bg-white border-t border-gray-200 text-[#050505] md:hidden flex flex-col gap-4 p-4 z-10 font-normal">
-          <Link href="#" className="flex items-center gap-1">
-            Search
-          </Link>
+          <Link href="#">Search</Link>
           <Link href="#">About</Link>
           <Link href="#">Inspiration</Link>
           <Link href="#">Shop</Link>
