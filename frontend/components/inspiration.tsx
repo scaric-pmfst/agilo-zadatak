@@ -41,7 +41,7 @@ export default function CollectionInspiration() {
       {/* Image 3 + Text */}
       <div className="flex flex-col md:flex-row md:items-center gap-8">
         {/* Image */}
-        <div className="w-full md:w-1/2 overflow-hidden rounded-lg">
+        <div className="w-full md:w-1/2 max-w-[500px] overflow-hidden rounded-lg">
           <Image
             src={image3}
             alt="Setup Image 3"
