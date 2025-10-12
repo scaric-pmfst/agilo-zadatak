@@ -1,31 +1,164 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 
 interface ProductDetailProps {
-  title: string;
-  collection: string;
-  price: number;
-  description: string;
-  materials: string[];
-  colors: string[];
-  images: string[];
+  product: any;
+  regionId: string;
 }
 
+const COLOR_MAP: Record<string, string> = {
+  Black: "#000000",
+  "Dark Gray": "#4B5563",
+  "Light Gray": "#D1D5DB",
+  White: "#FFFFFF",
+  Beige: "#F5F5DC",
+};
+
 export default function ProductDetail({
-  title,
-  collection,
-  price,
-  description,
-  materials,
-  colors,
-  images,
+  product,
+  regionId,
 }: ProductDetailProps) {
-  const [selectedMaterial, setSelectedMaterial] = useState(materials[0]);
-  const [selectedColor, setSelectedColor] = useState(colors[0]);
+  // Debug: Log the product data
+  useEffect(() => {
+    console.log("Full product data:", product);
+    console.log("Variants:", product.variants);
+    console.log("Region ID:", regionId);
+  }, [product, regionId]);
+
+  // Extract unique option values
+  const colorsOption = product.options?.find((opt: any) =>
+    ["color", "colors"].includes(opt.title.toLowerCase())
+  );
+
+  const materialsOption = product.options?.find(
+    (opt: any) => opt.title.toLowerCase() === "materials"
+  );
+
+  const colors = colorsOption?.values?.map((v: any) => v.value) || [];
+  const materials = materialsOption?.values?.map((v: any) => v.value) || [];
+
+  console.log("Colors:", colors);
+  console.log("Materials:", materials);
+
+  const [selectedMaterial, setSelectedMaterial] = useState(materials[0] || "");
+  const [selectedColor, setSelectedColor] = useState(colors[0] || "");
   const [quantity, setQuantity] = useState(1);
   const [currentImage, setCurrentImage] = useState(0);
+
+  // Find the matching variant based on selected options
+  const selectedVariant = useMemo(() => {
+    if (!product.variants) {
+      console.log("No variants found!");
+      return null;
+    }
+
+    console.log("Looking for variant with:", {
+      selectedMaterial,
+      selectedColor,
+    });
+
+    const found = product.variants.find((variant: any) => {
+      const variantOptions = variant.options || [];
+
+      console.log("Checking variant:", variant.title, variantOptions);
+
+      const variantMaterial = variantOptions.find(
+        (opt: any) => opt.option?.title === "Materials"
+      )?.value;
+
+      const variantColor = variantOptions.find(
+        (opt: any) => opt.option?.title === "Colors"
+      )?.value;
+
+      console.log("Variant options:", { variantMaterial, variantColor });
+
+      const matches =
+        variantMaterial === selectedMaterial && variantColor === selectedColor;
+      console.log("Matches:", matches);
+
+      return matches;
+    });
+
+    console.log("Selected variant:", found);
+    return found;
+  }, [product.variants, selectedMaterial, selectedColor]);
+
+  // Get price for the region
+  const price = useMemo(() => {
+    console.log("Calculating price for variant:", selectedVariant);
+
+    if (!selectedVariant?.prices) {
+      console.log("No prices found on variant");
+      return 0;
+    }
+
+    console.log("Available prices:", selectedVariant.prices);
+
+    // First try to find price with region rule
+    const regionPrice = selectedVariant.prices.find(
+      (p: any) => p.rules?.region_id === regionId
+    );
+
+    // If not found, get default price (no rules)
+    const defaultPrice = selectedVariant.prices.find(
+      (p: any) => !p.rules || Object.keys(p.rules).length === 0
+    );
+
+    console.log("Region price:", regionPrice);
+    console.log("Default price:", defaultPrice);
+
+    const priceObj = regionPrice || defaultPrice;
+    const finalPrice = priceObj ? priceObj.amount : 0;
+
+    console.log("Final price:", finalPrice);
+    return finalPrice;
+  }, [selectedVariant, regionId]);
+
+  // Get inventory quantity
+  const inventoryQuantity = useMemo(() => {
+    console.log("Calculating inventory for variant:", selectedVariant);
+
+    if (!selectedVariant?.inventory_items) {
+      console.log("No inventory_items found");
+      return 0;
+    }
+
+    console.log("Inventory items:", selectedVariant.inventory_items);
+
+    const inventoryItem = selectedVariant.inventory_items[0];
+    if (!inventoryItem?.inventory?.location_levels?.[0]) {
+      console.log("No location levels found");
+      return 0;
+    }
+
+    const qty =
+      inventoryItem.inventory.location_levels[0].available_quantity || 0;
+    console.log("Available quantity:", qty);
+    return qty;
+  }, [selectedVariant]);
+
+  const images = product.images?.map((img: any) => img.url) || [];
+
+  const handleAddToCart = async () => {
+    if (!selectedVariant) {
+      alert("Please select all options");
+      return;
+    }
+
+    if (inventoryQuantity < quantity) {
+      alert(`Only ${inventoryQuantity} items available in stock`);
+      return;
+    }
+
+    console.log("Adding to cart:", {
+      variantId: selectedVariant.id,
+      quantity,
+      price,
+      sku: selectedVariant.sku,
+    });
+  };
 
   return (
     <section className="flex flex-col md:flex-row min-h-screen px-6 md:px-16 py-16 md:py-24">
@@ -33,14 +166,20 @@ export default function ProductDetail({
       <div className="md:w-1/2 flex flex-col items-center justify-center relative rounded-lg overflow-hidden">
         {/* Image container */}
         <div className="relative w-full h-[500px] md:h-[700px] flex justify-center items-center rounded-lg">
-          <Image
-            src={images[currentImage]}
-            alt={title}
-            fill
-            className="object-contain"
-            sizes="100vw"
-            priority
-          />
+          {images.length > 0 ? (
+            <Image
+              src={images[currentImage]}
+              alt={product.title}
+              fill
+              className="object-contain"
+              sizes="100vw"
+              priority
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-400">No image available</span>
+            </div>
+          )}
 
           {/* Previous / Next Image */}
           {images.length > 1 && (
@@ -73,8 +212,8 @@ export default function ProductDetail({
 
         {/* Image index buttons */}
         {images.length > 1 && (
-          <div className="flex gap-2">
-            {images.map((_, index) => (
+          <div className="flex gap-2 mt-4">
+            {images.map((_: any, index: number) => (
               <button
                 key={index}
                 onClick={() => setCurrentImage(index)}
@@ -93,69 +232,132 @@ export default function ProductDetail({
 
       {/* Product details */}
       <div className="md:w-1/2 md:pl-16 mt-10 md:mt-0 flex flex-col justify-center">
-        <p className="text-sm text-gray-500 mb-1">{collection}</p>
-        <h1 className="text-[32px] md:text-[48px] font-medium mb-2">{title}</h1>
-        <p className="text-xl md:text-2xl font-normal mb-6">€{price}</p>
+        <p className="text-sm text-gray-500 mb-1">
+          {product.subtitle || product.collection?.title || ""}
+        </p>
+
+        <h1 className="text-[32px] md:text-[48px] font-medium mb-2">
+          {product.title}
+        </h1>
+
+        <p className="text-xl md:text-2xl font-normal mb-6">
+          €{price.toFixed(2)}
+        </p>
 
         <p className="text-gray-700 mb-8 max-w-lg text-[16px] md:text-[18px] leading-relaxed">
-          {description}
+          {product.description}
         </p>
 
         {/* Materials */}
-        <div className="mb-6">
-          <p className="text-gray-800 font-medium mb-2">Materials</p>
-          <select
-            value={selectedMaterial}
-            onChange={(e) => setSelectedMaterial(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 w-48 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-          >
-            {materials.map((material) => (
-              <option key={material} value={material}>
-                {material}
-              </option>
-            ))}
-          </select>
-        </div>
+        {materials.length > 0 && (
+          <div className="mb-6">
+            <p className="text-gray-800 font-medium mb-2">Materials</p>
+            <select
+              value={selectedMaterial}
+              onChange={(e) => setSelectedMaterial(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 w-48 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            >
+              {materials.map((material: string) => (
+                <option key={material} value={material}>
+                  {material}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Colors */}
-        <div className="mb-8">
-          <p className="text-gray-800 font-medium mb-3">Colors</p>
-          <div className="flex gap-3">
-            {colors.map((color) => (
-              <button
-                key={color}
-                onClick={() => setSelectedColor(color)}
-                className={`w-8 h-8 rounded-md border transition-transform ${
-                  selectedColor === color
-                    ? "border-black scale-105"
-                    : "border-gray-300"
-                }`}
-                style={{ backgroundColor: color }}
-                aria-label={`Select color ${color}`}
-              />
-            ))}
+        {colors.length > 0 && (
+          <div className="mb-8">
+            <p className="text-gray-800 font-medium mb-3">Colors</p>
+            <div className="flex gap-3">
+              {colors.map((color: string) => {
+                const hexColor = COLOR_MAP[color] || "#CCCCCC";
+                return (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`w-10 h-10 rounded-md border-2 transition-all ${
+                      selectedColor === color
+                        ? "border-black ring-2 ring-black ring-offset-2"
+                        : "border-gray-300 hover:border-gray-400"
+                    }`}
+                    style={{ backgroundColor: hexColor }}
+                    aria-label={`Select color ${color}`}
+                    title={color}
+                  />
+                );
+              })}
+            </div>
+            <p className="text-sm text-gray-600 mt-2">
+              Selected: {selectedColor}
+            </p>
           </div>
+        )}
+
+        {/* Debug info */}
+        <div className="mb-4 p-4 bg-gray-100 rounded text-xs">
+          <p>Selected Material: {selectedMaterial}</p>
+          <p>Selected Color: {selectedColor}</p>
+          <p>Variant Found: {selectedVariant ? "Yes" : "No"}</p>
+          <p>Variant SKU: {selectedVariant?.sku || "N/A"}</p>
+          <p>Price: €{price}</p>
+          <p>Stock: {inventoryQuantity}</p>
         </div>
 
-        {/* Quantity and `Add to Cart` */}
+        {/* Stock and Variant SKU */}
+        {selectedVariant && (
+          <div className="mb-4 space-y-1">
+            <p className="text-sm text-gray-600">
+              SKU:{" "}
+              <span className="font-medium">
+                {selectedVariant.sku || "N/A"}
+              </span>
+            </p>
+            <p className="text-sm text-gray-600">
+              Stock:{" "}
+              <span
+                className={`font-medium ${
+                  inventoryQuantity > 0 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {inventoryQuantity > 0
+                  ? `${inventoryQuantity} available`
+                  : "Out of stock"}
+              </span>
+            </p>
+          </div>
+        )}
+
+        {/* Quantity and `Add to cart`/`Out of stock`*/}
         <div className="flex items-center gap-4">
-          <div className="flex items-center border rounded-md">
+          <div className="flex items-center border border-gray-300 rounded-md">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="px-3 py-2 text-lg"
+              className="px-3 py-2 text-lg hover:bg-gray-50"
+              disabled={!selectedVariant || inventoryQuantity === 0}
             >
               -
             </button>
-            <span className="px-4 text-sm">{quantity}</span>
+            <span className="px-4 text-sm min-w-[40px] text-center">
+              {quantity}
+            </span>
             <button
-              onClick={() => setQuantity(quantity + 1)}
-              className="px-3 py-2 text-lg"
+              onClick={() =>
+                setQuantity(Math.min(inventoryQuantity, quantity + 1))
+              }
+              className="px-3 py-2 text-lg hover:bg-gray-50"
+              disabled={!selectedVariant || inventoryQuantity === 0}
             >
               +
             </button>
           </div>
-          <button className="bg-black text-white px-8 py-3 rounded-md text-sm hover:bg-gray-800 transition">
-            Add to cart
+          <button
+            onClick={handleAddToCart}
+            disabled={!selectedVariant || inventoryQuantity === 0}
+            className="bg-black text-white px-8 py-3 rounded-md text-sm hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {inventoryQuantity === 0 ? "Out of stock" : "Add to cart"}
           </button>
         </div>
 
