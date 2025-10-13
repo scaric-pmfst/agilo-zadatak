@@ -89,6 +89,30 @@ export default function ProductDetail({
     return found;
   }, [product.variants, selectedMaterial, selectedColor]);
 
+  // Automatically select the first variant if nothing is selected yet
+  useEffect(() => {
+    if (product.variants?.length && !selectedVariant) {
+      const firstVariant = product.variants[0];
+      console.log("Auto-selecting first variant:", firstVariant);
+
+      // Extract colors and materials (If they are available)
+      const variantMaterial =
+        firstVariant.options?.find(
+          (opt: any) => opt.option?.title === "Materials"
+        )?.value || "";
+      const variantColor =
+        firstVariant.options?.find((opt: any) => opt.option?.title === "Colors")
+          ?.value || "";
+
+      if (variantMaterial) {
+        setSelectedMaterial(variantMaterial);
+      }
+      if (variantColor) {
+        setSelectedColor(variantColor);
+      }
+    }
+  }, [product.variants, selectedVariant]);
+
   // Get the price for the region
   const price = useMemo(() => {
     console.log("Calculating price for variant:", selectedVariant);
