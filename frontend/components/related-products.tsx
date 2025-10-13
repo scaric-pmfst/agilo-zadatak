@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
+import { calculateVariantPrice } from "@/lib/medusa";
 
 interface RelatedProductsProps {
   products: any[];
@@ -43,47 +44,10 @@ function ProductCard({
     return product.variants[0];
   }, [product.variants]);
 
-  // Calculate pricing (same as ProductDetail)
+  // Calculate pricing
   const { originalPrice, calculatedPrice, isOnSale, discountPercentage } =
     useMemo(() => {
-      if (!displayVariant?.prices) {
-        return {
-          originalPrice: 0,
-          calculatedPrice: 0,
-          isOnSale: false,
-          discountPercentage: 0,
-        };
-      }
-
-      // Try to find price with region rule
-      const regionPrice = displayVariant.prices.find(
-        (p: any) => p.rules?.region_id === regionId
-      );
-
-      // If not found, use the default price
-      const defaultPrice = displayVariant.prices.find(
-        (p: any) => !p.rules || Object.keys(p.rules).length === 0
-      );
-
-      const priceObj = regionPrice || defaultPrice;
-      const original = priceObj ? priceObj.amount : 0;
-
-      // Calculate price with discounts (if there are any)
-      const calculated = displayVariant.calculated_price?.calculated_amount
-        ? displayVariant.calculated_price.calculated_amount
-        : original;
-
-      const onSale = calculated < original && original > 0;
-      const discount = onSale
-        ? Math.round(((original - calculated) / original) * 100)
-        : 0;
-
-      return {
-        originalPrice: original,
-        calculatedPrice: calculated,
-        isOnSale: onSale,
-        discountPercentage: discount,
-      };
+      return calculateVariantPrice(displayVariant, regionId);
     }, [displayVariant, regionId]);
 
   // Get the first image of the product

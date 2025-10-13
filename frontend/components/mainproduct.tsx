@@ -3,6 +3,13 @@
 import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { useCart } from "@/components/cart-component";
+import {
+  calculateVariantPrice,
+  getVariantInventory,
+  extractProductOptions,
+  findVariantByOptions,
+  getFirstVariantOptions,
+} from "@/lib/medusa";
 
 interface ProductDetailProps {
   product: any;
@@ -32,17 +39,8 @@ export default function ProductDetail({
     console.log("Region ID:", regionId);
   }, [product, regionId]);
 
-  // Extract unique option values
-  const colorsOption = product.options?.find((opt: any) =>
-    ["color", "colors"].includes(opt.title.toLowerCase())
-  );
-
-  const materialsOption = product.options?.find((opt: any) =>
-    ["material", "materials"].includes(opt.title.toLowerCase())
-  );
-
-  const colors = colorsOption?.values?.map((v: any) => v.value) || [];
-  const materials = materialsOption?.values?.map((v: any) => v.value) || [];
+  // Extract product options
+  const { colors, materials } = extractProductOptions(product);
 
   console.log("Colors:", colors);
   console.log("Materials:", materials);
@@ -52,7 +50,7 @@ export default function ProductDetail({
   const [quantity, setQuantity] = useState(1);
   const [currentImage, setCurrentImage] = useState(0);
 
-  // Find the matching variant based on selected options
+  // Find the matching variant
   const selectedVariant = useMemo(() => {
     if (!product.variants) {
       console.log("No variants found!");
@@ -64,137 +62,43 @@ export default function ProductDetail({
       selectedColor,
     });
 
-    const found = product.variants.find((variant: any) => {
-      const variantOptions = variant.options || [];
-
-      console.log("Checking variant:", variant.title, variantOptions);
-
-      const variantMaterial = variantOptions.find(
-        (opt: any) =>
-          opt.option?.title === "Materials" || opt.option?.title === "Material"
-      )?.value;
-
-      const variantColor = variantOptions.find(
-        (opt: any) =>
-          opt.option?.title === "Colors" || opt.option?.title === "Color"
-      )?.value;
-
-      console.log("Variant options:", { variantMaterial, variantColor });
-
-      const matches =
-        variantMaterial === selectedMaterial && variantColor === selectedColor;
-      console.log("Matches:", matches);
-
-      return matches;
-    });
+    const found = findVariantByOptions(
+      product,
+      selectedMaterial,
+      selectedColor
+    );
 
     console.log("Selected variant:", found);
     return found;
-  }, [product.variants, selectedMaterial, selectedColor]);
+  }, [product, selectedMaterial, selectedColor]);
 
   // Automatically select the first variant if nothing is selected yet
   useEffect(() => {
     if (product.variants?.length && !selectedVariant) {
-      const firstVariant = product.variants[0];
-      console.log("Auto-selecting first variant:", firstVariant);
+      console.log("Auto-selecting first variant");
 
-      // Extract colors and materials (If they are available)
-      const variantMaterial =
-        firstVariant.options?.find(
-          (opt: any) =>
-            opt.option?.title === "Materials" ||
-            opt.option?.title === "Material"
-        )?.value || "";
-      const variantColor =
-        firstVariant.options?.find(
-          (opt: any) =>
-            opt.option?.title === "Colors" || opt.option?.title === "Color"
-        )?.value || "";
+      const { material, color } = getFirstVariantOptions(product);
 
-      if (variantMaterial) {
-        setSelectedMaterial(variantMaterial);
+      if (material) {
+        setSelectedMaterial(material);
       }
-      if (variantColor) {
-        setSelectedColor(variantColor);
+      if (color) {
+        setSelectedColor(color);
       }
     }
-  }, [product.variants, selectedVariant]);
+  }, [product, selectedVariant]);
 
-  // Get the price for the region
-  const originalPrice = useMemo(() => {
-    console.log("Calculating price for variant:", selectedVariant);
-
-    if (!selectedVariant?.prices) {
-      console.log("No prices found on variant");
-      return 0;
-    }
-
-    console.log("Available prices:", selectedVariant.prices);
-
-    // Try to find price with region rule
-    const regionPrice = selectedVariant.prices.find(
-      (p: any) => p.rules?.region_id === regionId
-    );
-
-    // If not found, get the default price (no rules)
-    const defaultPrice = selectedVariant.prices.find(
-      (p: any) => !p.rules || Object.keys(p.rules).length === 0
-    );
-
-    console.log("Region price:", regionPrice);
-    console.log("Default price:", defaultPrice);
-
-    const priceObj = regionPrice || defaultPrice;
-    const finalPrice = priceObj ? priceObj.amount : 0;
-
-    console.log("Final price:", finalPrice);
-    return finalPrice;
-  }, [selectedVariant, regionId]);
-
-  // Calculated price (Discount)
-  const calculatedPrice = useMemo(() => {
-    if (!selectedVariant?.calculated_price) {
-      return originalPrice;
-    }
-
-    // Calculated Price from any price list discounts
-    return selectedVariant.calculated_price.calculated_amount || originalPrice;
-  }, [selectedVariant, originalPrice]);
-
-  const isOnSale = useMemo(() => {
-    return calculatedPrice < originalPrice && originalPrice > 0;
-  }, [calculatedPrice, originalPrice]);
-
-  const discountPercentage = useMemo(() => {
-    if (!isOnSale) {
-      return 0;
-    }
-    return Math.round(
-      ((originalPrice - calculatedPrice) / originalPrice) * 100
-    );
-  }, [isOnSale, originalPrice, calculatedPrice]);
+  // Calculate pricing
+  const { originalPrice, calculatedPrice, isOnSale, discountPercentage } =
+    useMemo(() => {
+      console.log("Calculating price for variant:", selectedVariant);
+      return calculateVariantPrice(selectedVariant, regionId);
+    }, [selectedVariant, regionId]);
 
   // Get inventory quantity
   const inventoryQuantity = useMemo(() => {
     console.log("Calculating inventory for variant:", selectedVariant);
-
-    if (!selectedVariant?.inventory_items) {
-      console.log("No inventory_items found");
-      return 0;
-    }
-
-    console.log("Inventory items:", selectedVariant.inventory_items);
-
-    const inventoryItem = selectedVariant.inventory_items[0];
-    if (!inventoryItem?.inventory?.location_levels?.[0]) {
-      console.log("No location levels found");
-      return 0;
-    }
-
-    const qty =
-      inventoryItem.inventory.location_levels[0].available_quantity || 0;
-    console.log("Available quantity:", qty);
-    return qty;
+    return getVariantInventory(selectedVariant);
   }, [selectedVariant]);
 
   const images = product.images?.map((img: any) => img.url) || [];
@@ -230,7 +134,6 @@ export default function ProductDetail({
       console.log("[ProductDetail] Item added successfully");
       setQuantity(1); // Reset quantity
     } catch (error) {
-      // No need to show another alert since CartContext is handling errors
       console.error("[ProductDetail] Failed to add item:", error);
     } finally {
       setIsAdding(false);
@@ -437,7 +340,7 @@ export default function ProductDetail({
           </div>
         )}
 
-        {/* Quantity and `Add to cart`/˙Out of stock` */}
+        {/* Quantity and `Add to cart`/`Out of stock` */}
         <div className="flex items-center gap-4">
           <div className="flex items-center border border-gray-300 rounded-md">
             <button
