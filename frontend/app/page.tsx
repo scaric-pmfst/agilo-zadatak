@@ -2,12 +2,14 @@ import Navbar from "@/components/navbar";
 import ProductDetail from "@/components/mainproduct";
 import Inspiration from "@/components/inspiration";
 import Footer from "@/components/footer";
-import { getProductWithInventory, DEFAULT_REGION_ID } from "@/lib/medusa";
+import {
+  getProductWithInventory,
+  getFirstProduct,
+  DEFAULT_REGION_ID,
+} from "@/lib/medusa";
 
 export default async function Home() {
-  const { product } = await getProductWithInventory(
-    "prod_01K76JV9KTY69D1ED2SY759MRG"
-  );
+  const { product } = await getFirstProduct();
   const safeProduct = JSON.parse(JSON.stringify(product));
   return (
     <main>
