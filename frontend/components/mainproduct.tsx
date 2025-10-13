@@ -14,8 +14,10 @@ const COLOR_MAP: Record<string, string> = {
   "Dark Gray": "#4B5563",
   "Light Gray": "#D1D5DB",
   White: "#FFFFFF",
-  Beige: "#F5F5DC",
+  Green: "#10B981",
+  Purple: "#8B5CF6",
 };
+
 
 export default function ProductDetail({
   product,
