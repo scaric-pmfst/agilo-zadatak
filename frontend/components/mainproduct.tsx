@@ -18,7 +18,6 @@ const COLOR_MAP: Record<string, string> = {
   Purple: "#8B5CF6",
 };
 
-
 export default function ProductDetail({
   product,
   regionId,
@@ -122,7 +121,7 @@ export default function ProductDetail({
   }, [product.variants, selectedVariant]);
 
   // Get the price for the region
-  const price = useMemo(() => {
+  const originalPrice = useMemo(() => {
     console.log("Calculating price for variant:", selectedVariant);
 
     if (!selectedVariant?.prices) {
@@ -151,6 +150,29 @@ export default function ProductDetail({
     console.log("Final price:", finalPrice);
     return finalPrice;
   }, [selectedVariant, regionId]);
+
+  // Calculated price (Discount)
+  const calculatedPrice = useMemo(() => {
+    if (!selectedVariant?.calculated_price) {
+      return originalPrice;
+    }
+
+    // Calculated Price from any price list discounts
+    return selectedVariant.calculated_price.calculated_amount || originalPrice;
+  }, [selectedVariant, originalPrice]);
+
+  const isOnSale = useMemo(() => {
+    return calculatedPrice < originalPrice && originalPrice > 0;
+  }, [calculatedPrice, originalPrice]);
+
+  const discountPercentage = useMemo(() => {
+    if (!isOnSale) {
+      return 0;
+    }
+    return Math.round(
+      ((originalPrice - calculatedPrice) / originalPrice) * 100
+    );
+  }, [isOnSale, originalPrice, calculatedPrice]);
 
   // Get inventory quantity
   const inventoryQuantity = useMemo(() => {
@@ -198,7 +220,7 @@ export default function ProductDetail({
     console.log("Adding to cart:", {
       variantId: selectedVariant.id,
       quantity,
-      price,
+      calculatedPrice,
       sku: selectedVariant.sku,
     });
 
@@ -295,9 +317,27 @@ export default function ProductDetail({
           {product.title}
         </h1>
 
-        <p className="text-xl md:text-2xl font-normal mb-6">
-          €{price.toFixed(2)}
-        </p>
+        <div className="mb-6">
+          {isOnSale ? (
+            <div className="flex flex-col items-start">
+              <p className="text-xl md:text-2xl text-red-600">
+                €{calculatedPrice.toFixed(2)}
+              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-lg line-through text-gray-500">
+                  €{originalPrice.toFixed(2)}
+                </p>
+                <span className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
+                  -{discountPercentage}%
+                </span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xl md:text-2xl font-normal">
+              €{calculatedPrice.toFixed(2)}
+            </p>
+          )}
+        </div>
 
         <p className="text-gray-700 mb-8 max-w-lg text-[16px] md:text-[18px] leading-relaxed">
           {product.description}
@@ -367,7 +407,7 @@ export default function ProductDetail({
           <p>Variant Found: {selectedVariant ? "Yes" : "No"}</p>
           <p>Variant ID: {selectedVariant?.id || "N/A"}</p>
           <p>Variant SKU: {selectedVariant?.sku || "N/A"}</p>
-          <p>Price: €{price}</p>
+          <p>Price: €{calculatedPrice}</p>
           <p>Stock: {inventoryQuantity}</p>
           <p>Quantity to Add: {quantity}</p>
           <p>Adding State: {isAdding ? "Yes" : "No"}</p>
