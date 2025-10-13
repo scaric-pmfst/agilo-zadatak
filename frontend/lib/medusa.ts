@@ -23,9 +23,7 @@ export async function getProductWithInventory(
 }
 
 // Fetches first product from Medusa Store (All products with limit to 1)
-export async function getFirstProduct(
-  regionId: string = DEFAULT_REGION_ID
-) {
+export async function getFirstProduct(regionId: string = DEFAULT_REGION_ID) {
   const listResponse = await medusa.store.product.list({
     limit: 1,
     region_id: regionId,
@@ -37,4 +35,24 @@ export async function getFirstProduct(
   }
 
   return getProductWithInventory(firstProduct.id);
+}
+
+// Fetch multiple products
+export async function getProducts(
+  excludeId?: string,
+  regionId: string = DEFAULT_REGION_ID,
+  limit: number = 10
+) {
+  const response = await medusa.store.product.list({
+    limit,
+    region_id: regionId,
+    fields: "*variants.prices,*variants.calculated_price,*images",
+  });
+
+  // Filter out the main product
+  const products = excludeId
+    ? response.products.filter((p) => p.id !== excludeId)
+    : response.products;
+
+  return products;
 }
