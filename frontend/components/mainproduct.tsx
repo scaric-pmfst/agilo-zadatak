@@ -36,8 +36,8 @@ export default function ProductDetail({
     ["color", "colors"].includes(opt.title.toLowerCase())
   );
 
-  const materialsOption = product.options?.find(
-    (opt: any) => opt.title.toLowerCase() === "materials"
+  const materialsOption = product.options?.find((opt: any) =>
+    ["material", "materials"].includes(opt.title.toLowerCase())
   );
 
   const colors = colorsOption?.values?.map((v: any) => v.value) || [];
@@ -69,11 +69,13 @@ export default function ProductDetail({
       console.log("Checking variant:", variant.title, variantOptions);
 
       const variantMaterial = variantOptions.find(
-        (opt: any) => opt.option?.title === "Materials"
+        (opt: any) =>
+          opt.option?.title === "Materials" || opt.option?.title === "Material"
       )?.value;
 
       const variantColor = variantOptions.find(
-        (opt: any) => opt.option?.title === "Colors"
+        (opt: any) =>
+          opt.option?.title === "Colors" || opt.option?.title === "Color"
       )?.value;
 
       console.log("Variant options:", { variantMaterial, variantColor });
@@ -98,11 +100,15 @@ export default function ProductDetail({
       // Extract colors and materials (If they are available)
       const variantMaterial =
         firstVariant.options?.find(
-          (opt: any) => opt.option?.title === "Materials"
+          (opt: any) =>
+            opt.option?.title === "Materials" ||
+            opt.option?.title === "Material"
         )?.value || "";
       const variantColor =
-        firstVariant.options?.find((opt: any) => opt.option?.title === "Colors")
-          ?.value || "";
+        firstVariant.options?.find(
+          (opt: any) =>
+            opt.option?.title === "Colors" || opt.option?.title === "Color"
+        )?.value || "";
 
       if (variantMaterial) {
         setSelectedMaterial(variantMaterial);
