@@ -172,7 +172,14 @@ export async function getProductWithInventory(
 /**
  * Fetches first product from Medusa Store (All products with limit to 1)
  */
-export async function getFirstProduct(regionId: string = DEFAULT_REGION_ID) {
+export async function getFirstOrProduct(
+  productId?: string,
+  regionId: string = DEFAULT_REGION_ID
+) {
+  if (productId) {
+    return getProductWithInventory(productId);
+  }
+
   const listResponse = await medusa.store.product.list({
     limit: 1,
     region_id: regionId,

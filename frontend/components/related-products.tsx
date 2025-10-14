@@ -58,7 +58,7 @@ function ProductCard({
   const subtitle = product.subtitle || product.collection?.title || "Product";
 
   return (
-    <Link href="" className="flex flex-col group cursor-pointer">
+    <Link href={`/?id=${product.id}`} className="flex flex-col group cursor-pointer">
       {/* Image */}
       <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl bg-gray-50 shadow-sm">
         {imageUrl ? (
