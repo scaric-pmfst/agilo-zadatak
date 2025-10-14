@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { mona } from "@/lib/fonts";
 import { CartProvider } from "@/components/cart-component";
 import CartDrawer from "@/components/cart-drawer";
 
@@ -14,8 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${mona.variable}`}>
+      <body className="font-sans">
         <CartProvider>
           {children}
           <CartDrawer />

@@ -16,7 +16,7 @@ export default function RelatedProducts({
 }: RelatedProductsProps) {
   return (
     <section className="py-16 px-6 md:px-16 bg-white text-black">
-      <h2 className="text-[28px] md:text-[36px] font-semibold mb-10">
+      <h2 className="text-[28px] md:text-[36px] font-medium mb-10">
         Related products
       </h2>
 
