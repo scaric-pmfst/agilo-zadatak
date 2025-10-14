@@ -93,15 +93,15 @@ function ProductCard({
           {isOnSale ? (
             <>
               <p className="text-lg md:text-xl text-red-600 font-medium">
-                €{calculatedPrice.toFixed(2)}
+                €{calculatedPrice}
               </p>
               <p className="text-sm md:text-base line-through text-gray-500">
-                €{originalPrice.toFixed(2)}
+                €{originalPrice}
               </p>
             </>
           ) : (
             <p className="text-lg md:text-xl text-gray-800">
-              €{calculatedPrice.toFixed(2)}
+              €{calculatedPrice}
             </p>
           )}
         </div>

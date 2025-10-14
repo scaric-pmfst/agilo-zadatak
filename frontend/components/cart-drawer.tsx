@@ -43,15 +43,15 @@ export default function CartDrawer() {
           </button>
         </div>
 
-        {/* Debug Info */}
+        {/* Debug Info
         <div className="p-4 bg-yellow-50 border-b text-xs">
           <p className="font-bold mb-1">Cart Debug Info:</p>
           <p>Cart ID: {cart?.id || "None"}</p>
           <p>Items Count: {itemsCount}</p>
           <p>Items in Array: {cart?.items?.length || 0}</p>
-          <p>Subtotal: €{subtotal.toFixed(2)}</p>
+          <p>Subtotal: €{subtotal}</p>
           <p>Region: {cart?.region?.currency_code || "N/A"}</p>
-        </div>
+        </div> */}
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto p-6">
@@ -131,7 +131,7 @@ export default function CartDrawer() {
 
                         {/* Price */}
                         <p className="font-medium text-sm">
-                          €{(item.unit_price * item.quantity).toFixed(2)}
+                          €{(item.unit_price * item.quantity)}
                         </p>
                       </div>
                     </div>
@@ -160,7 +160,7 @@ export default function CartDrawer() {
             {/* Subtotal */}
             <div className="flex justify-between text-lg font-medium">
               <span>Subtotal</span>
-              <span>€{subtotal.toFixed(2)}</span>
+              <span>€{subtotal}</span>
             </div>
 
             {/* Checkout */}

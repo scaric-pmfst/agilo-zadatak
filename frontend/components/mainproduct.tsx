@@ -224,11 +224,11 @@ export default function ProductDetail({
           {isOnSale ? (
             <div className="flex flex-col items-start">
               <p className="text-xl md:text-2xl text-red-600">
-                €{calculatedPrice.toFixed(2)}
+                €{calculatedPrice}
               </p>
               <div className="flex items-center gap-2">
                 <p className="text-lg line-through text-gray-500">
-                  €{originalPrice.toFixed(2)}
+                  €{originalPrice}
                 </p>
                 <span className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
                   -{discountPercentage}%
@@ -237,7 +237,7 @@ export default function ProductDetail({
             </div>
           ) : (
             <p className="text-xl md:text-2xl font-normal">
-              €{calculatedPrice.toFixed(2)}
+              €{calculatedPrice}
             </p>
           )}
         </div>
@@ -302,7 +302,7 @@ export default function ProductDetail({
           </div>
         )}
 
-        {/* Debug info */}
+        {/* Debug info
         <div className="mb-4 p-4 bg-gray-100 rounded text-xs space-y-1">
           <p className="font-bold">Product Debug Info:</p>
           <p>Selected Material: {selectedMaterial}</p>
@@ -314,7 +314,7 @@ export default function ProductDetail({
           <p>Stock: {inventoryQuantity}</p>
           <p>Quantity to Add: {quantity}</p>
           <p>Adding State: {isAdding ? "Yes" : "No"}</p>
-        </div>
+        </div> */}
 
         {/* Stock and Variant SKU */}
         {selectedVariant && (
