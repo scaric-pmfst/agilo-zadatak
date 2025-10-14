@@ -9,10 +9,16 @@ import {
   DEFAULT_REGION_ID,
 } from "@/lib/medusa";
 
-export default async function Home({ searchParams }: { searchParams: { id?: string } }) {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ id?: string }>;
+}) {
+
+  const { id } = await searchParams;
   // Get the main product
-  console.log(searchParams.id)
-  const { product } = await getFirstOrProduct(searchParams.id);
+  console.log(id);
+  const { product } = await getFirstOrProduct(id);
 
   // Get 3 products that serve as related products
   const relatedProducts = await getProducts(product.id, DEFAULT_REGION_ID);
