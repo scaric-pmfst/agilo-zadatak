@@ -89,7 +89,7 @@ export default function CartDrawer() {
                     <div className="flex-1">
                       <h3 className="font-medium text-sm">{item.title}</h3>
                       <p className="text-xs text-gray-500 mt-1">
-                        {item.variant?.title || item.description || ""}
+                        {item.variant?.title || item.description || ""} {item.variant_title}
                       </p>
 
                       {/* Quantity + Price */}
