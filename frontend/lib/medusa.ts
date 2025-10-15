@@ -1,7 +1,7 @@
 import Medusa from "@medusajs/js-sdk";
 
 const medusa = new Medusa({
-  baseUrl: process.env.PUBLIC_MEDUSA_URL || "http://localhost:9000",
+  baseUrl: process.env.NEXT_PUBLIC_MEDUSA_URL || "http://localhost:9000",
   publishableKey: process.env.NEXT_PUBLIC_MEDUSA_API_KEY,
 });
 

@@ -91,7 +91,15 @@ Medusa Store će biti dostupna na portu `9000` (`http://localhost:9000`)
    cd frontend
    npm install
    ```
-2. Pokrenite aplikaciju:
+
+2. Kreirajte `.env.local` datoteku u kojoj postavljate Medusa API:
+```
+NEXT_PUBLIC_MEDUSA_API_KEY=
+NEXT_PUBLIC_MEDUSA_URL=
+```
+
+
+3. Pokrenite aplikaciju:
 
 (Developer)
 
@@ -104,7 +112,7 @@ npm run build
 npm run start
 ```
 
-3. Aplikacija će biti dostupna na `http://localhost:3000`
+4. Aplikacija će biti dostupna na `http://localhost:3000`
 
 ---
 
@@ -128,7 +136,7 @@ npm run start
 
 1. **Postavljanje backend-a i korištenje SDK-a**
 
-   - Najviše vremena je otišlo na istraživanje Meduse pošto je ovo prvi put da radim sa ovim.
+   - Najviše vremena je otišlo na istraživanje Meduse pošto je ovo prvi put da radim sa platformom.
    - Problem je nastao kod pokretanja pomoću `npm run start` (production) koji nije radio sve dok nisam implementirao onemogućavanje ugrađenog admin panela (ovo bi trebalo dodatno pogledat kako točno radi pošto je trenutno rješenje neefikasno).
 
 2. **Debugiranje**
