@@ -1,0 +1,133 @@
+[
+  {
+    "title": "Paloma Haven",
+    "handle": "sofa",
+    "subtitle": "Modern Luxe",
+    "description": "Minimalistic designs, neutral colors, and high-quality textures. Perfect for those who seek comfort with a clean and understated aesthetic. This collection brings the essence of Scandinavian elegance to your living room.",
+    "status": "published",
+    "thumbnail": "http://localhost:9000/static/1760083945072-6620ea897d26d568997efa34abc517d9177df473.jpg",
+    "collection_id": "pcol_01K7BZKZ7E4BCV6VYGAVHAB6KC",
+    "discountable": true,
+    "images": [
+      {
+        "url": "http://localhost:9000/static/1760083945072-6620ea897d26d568997efa34abc517d9177df473.jpg"
+      },
+      { "url": "http://localhost:9000/static/1760444726575-image.jpeg" }
+    ],
+    "options": [
+      { "title": "Materials", "values": ["Linen"] },
+      { "title": "Colors", "values": ["Dark Gray", "Black", "Light Gray"] }
+    ],
+    "variants": [
+      {
+        "title": "Linen / Dark Gray",
+        "sku": "sku-11",
+        "options": {
+          "Materials": "Linen",
+          "Colors": "Dark Gray"
+        },
+        "prices": [{ "currency_code": "eur", "amount": 12000 }]
+      },
+      {
+        "title": "Linen / Black",
+        "sku": "sku-12",
+        "options": {
+          "Materials": "Linen",
+          "Colors": "Black"
+        },
+        "prices": [{ "currency_code": "eur", "amount": 12000 }]
+      },
+      {
+        "title": "Linen / Light Gray",
+        "sku": "sku-13",
+        "options": {
+          "Materials": "Linen",
+          "Colors": "Light Gray"
+        },
+        "prices": [{ "currency_code": "eur", "amount": 12000 }]
+      }
+    ]
+  },
+  {
+    "title": "Camden Retreat",
+    "handle": "camden-retreat",
+    "subtitle": "Boho Chic",
+    "description": "Minimalistic designs, neutral colors, and high-quality textures. Perfect for those who seek comfort with a clean and understated aesthetic.",
+    "status": "published",
+    "thumbnail": "http://localhost:9000/static/1760339378573-image.jpeg",
+    "collection_id": "pcol_01K7BZKZ7E4BCV6VYGAVHAB6KC",
+    "discountable": true,
+    "images": [
+      { "url": "http://localhost:9000/static/1760339378573-image.jpeg" }
+    ],
+    "options": [
+      { "title": "Colors", "values": ["Green"] },
+      { "title": "Materials", "values": ["Linen"] }
+    ],
+    "variants": [
+      {
+        "title": "Green / Linen",
+        "sku": "sku-21",
+        "options": {
+          "Colors": "Green",
+          "Materials": "Linen"
+        },
+        "prices": [{ "currency_code": "eur", "amount": 1000 }]
+      }
+    ]
+  },
+  {
+    "title": "Oslo Drift",
+    "handle": "oslo-drift",
+    "subtitle": "Scandinavian Simplicity",
+    "status": "published",
+    "thumbnail": "http://localhost:9000/static/1760376644156-image(1).jpeg",
+    "collection_id": "pcol_01K7BZKZ7E4BCV6VYGAVHAB6KC",
+    "discountable": true,
+    "images": [
+      { "url": "http://localhost:9000/static/1760376644156-image(1).jpeg" }
+    ],
+    "options": [
+      { "title": "Colors", "values": ["White"] },
+      { "title": "Materials", "values": ["Linen"] }
+    ],
+    "variants": [
+      {
+        "title": "White / Linen",
+        "sku": "sku-31",
+        "options": {
+          "Colors": "White",
+          "Materials": "Linen"
+        },
+        "prices": [{ "currency_code": "eur", "amount": 3000 }]
+      }
+    ]
+  },
+  {
+    "title": "Sutton Royale",
+    "handle": "sutton-royale",
+    "subtitle": "Modern Luxe",
+    "status": "published",
+    "thumbnail": "http://localhost:9000/static/1760376796844-image.jpeg",
+    "collection_id": "pcol_01K7BZKZ7E4BCV6VYGAVHAB6KC",
+    "discountable": true,
+    "images": [
+      { "url": "http://localhost:9000/static/1760376796844-image.jpeg" }
+    ],
+    "options": [
+      { "title": "Colors", "values": ["Purple"] },
+      { "title": "Materials", "values": ["Linen"] }
+    ],
+    "variants": [
+      {
+        "title": "Purple / Linen",
+        "sku": "sku-41",
+        "options": {
+          "Colors": "Purple",
+          "Materials": "Linen"
+        },
+        "prices": [{ "currency_code": "eur", "amount": 2500 }]
+      }
+    ]
+  }
+]
