@@ -84,6 +84,11 @@ npm run start (Bez Admin Panel-a)
 
 Medusa Store će biti dostupna na portu `9000` (`http://localhost:9000`)
 
+4. (Opcionalno) Ako želite imati demo podatke:
+```bash
+npm run seed
+```
+
 ## Frontend (Next.js)
 
 1. Instalirajte _dependencies_:
